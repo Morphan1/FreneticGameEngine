@@ -130,7 +130,6 @@ namespace FGEGraphics.GraphicsHelpers
         /// </summary>
         public void Reset()
         {
-            LoadedTextures = new Dictionary<string, Texture>();
             Empty();
             AddDefaults();
         }

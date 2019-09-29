@@ -22,6 +22,7 @@ using FGEGraphics.ClientSystem;
 using FGECore.ConsoleHelpers;
 using FreneticUtilities.FreneticExtensions;
 using FGECore.ModelSystems;
+using static FGECore.CoreSystems.AssetStreamingEngine;
 
 namespace FGEGraphics.GraphicsHelpers
 {
@@ -71,10 +72,35 @@ namespace FGEGraphics.GraphicsHelpers
             AnimEngine = engine;
             Handler = new ModelHandler();
             LoadedModels = new Dictionary<string, Model>(128);
+            AddDefaults();
+        }
+
+        /// <summary>
+        /// Resets the model engine to defaults added by <see cref="AddDefaults"/>.
+        /// </summary>
+        public void Reset()
+        {
+            Empty();
+            AddDefaults();
+        }
+
+        /// <summary>
+        /// Generates default models and adds them to the engine.
+        /// </summary>
+        public void AddDefaults()
+        {
             Cube = GenerateCube();
             LoadedModels.Add("cube", Cube);
             Cylinder = GetModel("cylinder");
             Sphere = GetModel("sphere");
+        }
+
+        /// <summary>
+        /// Clears away all current models.
+        /// </summary>
+        public void Empty()
+        {
+            LoadedModels.Clear();
         }
 
         /// <summary>
@@ -216,6 +242,8 @@ namespace FGEGraphics.GraphicsHelpers
                     model.ModelMax = new BEPUutilities.Vector3(1, 1, 1);
                     model.ModelBoundsSet = false;
                     model.IsLoaded = true;
+                    model.Goal.SyncFollowUp?.Invoke();
+                    model.Goal = null;
                 });
             }
             void fileMissing()
@@ -226,7 +254,7 @@ namespace FGEGraphics.GraphicsHelpers
             {
                 SysConsole.Output(OutputType.ERROR, $"Failed to load texture from filename '{TextStyle.Standout}models/{modelName}.vmd{TextStyle.Error}': {message}");
             }
-            TheClient.AssetStreaming.AddGoal($"models/{modelName}.vmd", false, processLoad, fileMissing, handleError);
+            model.Goal = TheClient.AssetStreaming.AddGoal($"models/{modelName}.vmd", false, processLoad, fileMissing, handleError);
             return model;
         }
 
@@ -509,6 +537,11 @@ namespace FGEGraphics.GraphicsHelpers
         /// Whether the model is loaded yet.
         /// </summary>
         public bool IsLoaded = false;
+
+        /// <summary>
+        /// The AssetStreamingEngine's goal for loading this texture, if not completed.
+        /// </summary>
+        public StreamGoal Goal;
 
         /// <summary>
         /// Adds a mesh to this model.
