@@ -20,6 +20,7 @@ using FGECore.CoreSystems;
 using FGECore.MathHelpers;
 using FGECore.FileSystems;
 using FGECore.ConsoleHelpers;
+using static FGECore.CoreSystems.AssetStreamingEngine;
 
 namespace FGEGraphics.GraphicsHelpers
 {
@@ -121,6 +122,24 @@ namespace FGEGraphics.GraphicsHelpers
             // Reset texture list
             LoadedTextures = new Dictionary<string, Texture>(256);
             // Pregenerate a few needed textures
+            AddDefaults();
+        }
+
+        /// <summary>
+        /// Resets the texture engine to defaults added by <see cref="AddDefaults"/>.
+        /// </summary>
+        public void Reset()
+        {
+            LoadedTextures = new Dictionary<string, Texture>();
+            Empty();
+            AddDefaults();
+        }
+
+        /// <summary>
+        /// Generates default textures and adds them to the engine.
+        /// </summary>
+        public void AddDefaults()
+        {
             White = GenerateForColor(Color.White, "white");
             LoadedTextures.Add("white", White);
             Black = GenerateForColor(Color.Black, "black");
@@ -216,6 +235,8 @@ namespace FGEGraphics.GraphicsHelpers
                 {
                     TextureFromBitMap(texture, bmp);
                     texture.LoadedProperly = true;
+                    texture.Goal.SyncFollowUp?.Invoke();
+                    texture.Goal = null;
                     bmp.Dispose();
                 });
             }
@@ -229,7 +250,7 @@ namespace FGEGraphics.GraphicsHelpers
                 SysConsole.Output(OutputType.ERROR, $"Failed to load texture from filename '{TextStyle.Standout}textures/{textureName}.png{TextStyle.Error}': {message}");
                 texture.LoadedProperly = false;
             }
-            AssetStreaming.AddGoal($"textures/{textureName}.png", false, processLoad, fileMissing, handleError);
+            texture.Goal = AssetStreaming.AddGoal($"textures/{textureName}.png", false, processLoad, fileMissing, handleError);
             return texture;
         }
 
@@ -522,6 +543,11 @@ namespace FGEGraphics.GraphicsHelpers
         /// Whether the texture loaded properly.
         /// </summary>
         public bool LoadedProperly = false;
+
+        /// <summary>
+        /// The AssetStreamingEngine's goal for loading this texture, if not completed.
+        /// </summary>
+        public StreamGoal Goal;
 
         /// <summary>
         /// The width of the texture.

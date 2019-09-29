@@ -96,6 +96,11 @@ namespace FGECore.CoreSystems
             public Action<byte[]> ProcessData;
 
             /// <summary>
+            /// A sync action that runs after <see cref="ProcessData"/> is finished.
+            /// </summary>
+            public Action SyncFollowUp;
+
+            /// <summary>
             /// Whether to sync the process result call to the main thread (if not, runs async).
             /// Defaults to false.
             /// </summary>
