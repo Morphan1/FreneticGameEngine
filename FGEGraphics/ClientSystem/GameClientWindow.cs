@@ -75,6 +75,7 @@ namespace FGEGraphics.ClientSystem
 
         /// <summary>
         /// Constructs the game client window.
+        /// <para>NOTE: The <see cref="CurrentEngine"/> is not automatically added to this instance's <see cref="GameInstance{T, T2}.Engines"/>.</para>
         /// </summary>
         /// <param name="_sWindowTitle">The starting window title.</param>
         /// <param name="threed">Whether the game is 3D.</param>
