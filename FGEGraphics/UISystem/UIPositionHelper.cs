@@ -74,7 +74,7 @@ namespace FGEGraphics.UISystem
         public int Const_X = 0;
 
         /// <summary>
-        /// Getter value for X, if value.
+        /// Getter value for X, if valid.
         /// </summary>
         public Func<int> Getter_X = GetZero;
 
@@ -89,7 +89,7 @@ namespace FGEGraphics.UISystem
         public int Const_Y = 0;
 
         /// <summary>
-        /// Getter value for Y, if value.
+        /// Getter value for Y, if valid.
         /// </summary>
         public Func<int> Getter_Y = GetZero;
 
@@ -104,7 +104,7 @@ namespace FGEGraphics.UISystem
         public int Const_Width = 0;
 
         /// <summary>
-        /// Getter value for Width, if value.
+        /// Getter value for Width, if valid.
         /// </summary>
         public Func<int> Getter_Width = GetZero;
 
@@ -119,7 +119,7 @@ namespace FGEGraphics.UISystem
         public int Const_Height = 0;
 
         /// <summary>
-        /// Getter value for Height, if value.
+        /// Getter value for Height, if valid.
         /// </summary>
         public Func<int> Getter_Height = GetZero;
 
@@ -134,7 +134,7 @@ namespace FGEGraphics.UISystem
         public float Const_Rot = 0;
 
         /// <summary>
-        /// Getter value for Rotation, if value.
+        /// Getter value for Rotation, if valid.
         /// </summary>
         public Func<float> Getter_Rot = GetZeroF;
 
