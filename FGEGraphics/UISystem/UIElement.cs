@@ -334,8 +334,9 @@ namespace FGEGraphics.UISystem
                     int anchorY = Position.MainAnchor.GetY(this);
                     double cos = Math.Cos(-Parent.LastAbsoluteRotation);
                     double sin = Math.Sin(-Parent.LastAbsoluteRotation);
-                    int halfWidth = Parent.Position.Width / 2 - localSize.X / 2;
-                    int halfHeight = Parent.Position.Height / 2 - localSize.Y / 2;
+                    Vector2i parentSize = Parent.LastAbsoluteSize;
+                    int halfWidth = parentSize.X / 2 - localSize.X / 2;
+                    int halfHeight = parentSize.Y / 2 - localSize.Y / 2;
                     localPos = new Vector2i((int)(halfWidth + ((localPos.X + anchorX - halfWidth) * cos - (localPos.Y + anchorY - halfHeight) * sin)),
                                           (int)(halfHeight + ((localPos.X + anchorX - halfWidth) * sin + (localPos.Y + anchorY - halfHeight) * cos)));
                 }
