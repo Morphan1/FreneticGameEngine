@@ -330,7 +330,7 @@ namespace FGEGraphics.UISystem
         }
 
         /// <summary>
-        /// Gets the X coordinate.
+        /// Gets the absolute X coordinate.
         /// </summary>
         public int X
         {
@@ -350,7 +350,7 @@ namespace FGEGraphics.UISystem
         }
 
         /// <summary>
-        /// Gets the Y coordinate.
+        /// Gets the absolute Y coordinate.
         /// </summary>
         public int Y
         {
@@ -366,6 +366,44 @@ namespace FGEGraphics.UISystem
                     return anch + Getter_Y();
                 }
                 return anch;
+            }
+        }
+
+        /// <summary>
+        /// Gets the X coordinate relative to the parent.
+        /// </summary>
+        public int RelativeX
+        {
+            get
+            {
+                if (PM_X == UIPosMode.CONSTANT)
+                {
+                    return Const_X;
+                }
+                if (PM_X == UIPosMode.GETTER)
+                {
+                    return Getter_X();
+                }
+                return 0;
+            }
+        }
+
+        /// <summary>
+        /// Gets the Y coordinate relative to the parent.
+        /// </summary>
+        public int RelativeY
+        {
+            get
+            {
+                if (PM_Y == UIPosMode.CONSTANT)
+                {
+                    return Const_Y;
+                }
+                if (PM_Y == UIPosMode.GETTER)
+                {
+                    return Getter_Y();
+                }
+                return 0;
             }
         }
 
@@ -434,6 +472,17 @@ namespace FGEGraphics.UISystem
             get
             {
                 return new Vector2i(X, Y);
+            }
+        }
+
+        /// <summary>
+        /// Gets the relative X/Y coordinate pair.
+        /// </summary>
+        public Vector2i RelativePosition
+        {
+            get
+            {
+                return new Vector2i(RelativeX, RelativeY);
             }
         }
 

@@ -138,7 +138,7 @@ namespace FGEGraphics.ClientSystem
             Client.FontSets.FixTo = Client.Shaders.ColorMult2DShader;
             GraphicsUtil.CheckError("ViewUI2D - Draw - PreUpdate");
             LastRenderedSet.Clear();
-            CurrentScreen.UpdatePositions(LastRenderedSet, Client.Delta, 0, 0, Vector3.Zero);
+            CurrentScreen.UpdatePositions(LastRenderedSet, Client.Delta);
             GraphicsUtil.CheckError("ViewUI2D - Draw - PreDraw");
             foreach (UIElement elem in (SortToPriority ? LastRenderedSet.OrderBy((e) => e.RenderPriority) : (IEnumerable<UIElement>)LastRenderedSet))
             {

@@ -16,6 +16,7 @@ using FGEGraphics.GraphicsHelpers;
 using OpenTK;
 using FGECore.MathHelpers;
 using OpenTK.Input;
+using FGECore.CoreSystems;
 
 namespace FGEGraphics.UISystem
 {
@@ -68,7 +69,7 @@ namespace FGEGraphics.UISystem
         public Vector2i LastAbsoluteSize;
 
         /// <summary>
-        /// Last known aboslute rotation.
+        /// Last known absolute rotation.
         /// </summary>
         public float LastAbsoluteRotation;
 
@@ -96,8 +97,8 @@ namespace FGEGraphics.UISystem
         {
             Position = pos;
             Position.For = this;
-            LastAbsolutePosition = new Vector2i(Position.X, Position.Y);
-            LastAbsoluteSize = new Vector2i(Position.Width, Position.Height);
+            LastAbsolutePosition = Position.Position;
+            LastAbsoluteSize = Position.Size;
             LastAbsoluteRotation = Position.Rotation;
         }
 
@@ -321,46 +322,33 @@ namespace FGEGraphics.UISystem
         /// </summary>
         /// <param name="output">The UI elements created. Add all validly updated elements to list.</param>
         /// <param name="delta">The time since the last render.</param>
-        /// <param name="xoff">The X offset of this element's parent.</param>
-        /// <param name="yoff">The Y offset of this element's parent.</param>
-        /// <param name="lastRot">The last rotation made in the render chain.</param>
-        public virtual void UpdatePositions(IList<UIElement> output, double delta, int xoff, int yoff, Vector3 lastRot)
+        public virtual void UpdatePositions(IList<UIElement> output, double delta)
         {
             if (Parent == null || !Parent.ToRemove.Contains(this))
             {
-                int x;
-                int y;
-                if (Math.Abs(lastRot.Z) < 0.001f)
+                Vector2i localPos = Position.RelativePosition;
+                Vector2i localSize = Position.Size;
+                if (Parent != null)
                 {
-                    x = Position.X + xoff;
-                    y = Position.Y + yoff;
-                    lastRot = new Vector3(Position.Width * -0.5f, Position.Height * -0.5f, Position.Rotation);
+                    int anchorX = Position.MainAnchor.GetX(this);
+                    int anchorY = Position.MainAnchor.GetY(this);
+                    double cos = Math.Cos(-Parent.LastAbsoluteRotation);
+                    double sin = Math.Sin(-Parent.LastAbsoluteRotation);
+                    int halfWidth = Parent.Position.Width / 2 - localSize.X / 2;
+                    int halfHeight = Parent.Position.Height / 2 - localSize.Y / 2;
+                    localPos = new Vector2i((int)(halfWidth + ((localPos.X + anchorX - halfWidth) * cos - (localPos.Y + anchorY - halfHeight) * sin)),
+                                          (int)(halfHeight + ((localPos.X + anchorX - halfWidth) * sin + (localPos.Y + anchorY - halfHeight) * cos)));
                 }
-                else
+                LastAbsolutePosition = localPos;
+                LastAbsoluteSize = localSize;
+                LastAbsoluteRotation = Position.Rotation;
+                if (Parent != null)
                 {
-                    x = Position.X;
-                    y = Position.Y;
-                    int cwx = (Parent == null ? 0 : Position.MainAnchor.GetX(this));
-                    int chy = (Parent == null ? 0 : Position.MainAnchor.GetY(this));
-                    float half_wid = Position.Width * 0.5f;
-                    float half_hei = Position.Height * 0.5f;
-                    float tx = x + lastRot.X + cwx - half_wid;
-                    float ty = y + lastRot.Y + chy - half_hei;
-                    float cosRot = (float)Math.Cos(-lastRot.Z);
-                    float sinRot = (float)Math.Sin(-lastRot.Z);
-                    float tx2 = tx * cosRot - ty * sinRot - lastRot.X - cwx * 2 + half_wid;
-                    float ty2 = ty * cosRot + tx * sinRot - lastRot.Y - chy * 2 + half_hei;
-                    lastRot = new Vector3(-half_wid, -half_hei, lastRot.Z + Position.Rotation);
-                    int bx = (int)tx2 + xoff;
-                    int by = (int)ty2 + yoff;
-                    x = bx;
-                    y = by;
+                    LastAbsolutePosition += Parent.LastAbsolutePosition;
+                    LastAbsoluteRotation += Parent.LastAbsoluteRotation;
                 }
-                LastAbsolutePosition = new Vector2i(x, y);
-                LastAbsoluteRotation = lastRot.Z;
-                LastAbsoluteSize = new Vector2i(Position.Width, Position.Height);
                 output.Add(this);
-                UpdateChildPositions(output, delta, x, y, lastRot);
+                UpdateChildPositions(output, delta);
             }
         }
 
@@ -378,15 +366,12 @@ namespace FGEGraphics.UISystem
         /// </summary>
         /// <param name="output">The UI elements created. Add all validly updated elements to list.</param>
         /// <param name="delta">The time since the last render.</param>
-        /// <param name="xoff">The X offset of this element's parent.</param>
-        /// <param name="yoff">The Y offset of this element's parent.</param>
-        /// <param name="lastRot">The last rotation made in the render chain.</param>
-        protected virtual void UpdateChildPositions(IList<UIElement> output, double delta, int xoff, int yoff, Vector3 lastRot)
+        protected virtual void UpdateChildPositions(IList<UIElement> output, double delta)
         {
             CheckChildren();
             foreach (UIElement element in Children)
             {
-                element.UpdatePositions(output, delta, xoff, yoff, lastRot);
+                element.UpdatePositions(output, delta);
             }
         }
 
