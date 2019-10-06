@@ -193,7 +193,7 @@ namespace FGEGraphics.UISystem
         protected bool SelfContains(int x, int y)
         {
             // TODO: optimize
-            if (LastAbsoluteRotation > 0.001f)
+            if (Math.Abs(LastAbsoluteRotation) > 0.001f)
             {
                 double cos = Math.Cos(LastAbsoluteRotation);
                 double sin = Math.Sin(LastAbsoluteRotation);
@@ -346,13 +346,21 @@ namespace FGEGraphics.UISystem
                     {
                         int anchorX = Position.MainAnchor.GetX(this);
                         int anchorY = Position.MainAnchor.GetY(this);
-                        double cos = Math.Cos(-Parent.LastAbsoluteRotation);
-                        double sin = Math.Sin(-Parent.LastAbsoluteRotation);
-                        Vector2i parentSize = Parent.LastAbsoluteSize;
-                        int halfWidth = parentSize.X / 2 - localSize.X / 2;
-                        int halfHeight = parentSize.Y / 2 - localSize.Y / 2;
-                        localPos = new Vector2i((int)(halfWidth + ((localPos.X + anchorX - halfWidth) * cos - (localPos.Y + anchorY - halfHeight) * sin)),
-                                              (int)(halfHeight + ((localPos.X + anchorX - halfWidth) * sin + (localPos.Y + anchorY - halfHeight) * cos)));
+                        if (Math.Abs(Parent.LastAbsoluteRotation) > 0.001f)
+                        {
+                            double cos = Math.Cos(-Parent.LastAbsoluteRotation);
+                            double sin = Math.Sin(-Parent.LastAbsoluteRotation);
+                            Vector2i parentSize = Parent.LastAbsoluteSize;
+                            int rotationCenterX = parentSize.X / 2 - localSize.X / 2;
+                            int rotationCenterY = parentSize.Y / 2 - localSize.Y / 2;
+                            localPos = new Vector2i((int)(rotationCenterX + ((localPos.X + anchorX - rotationCenterX) * cos - (localPos.Y + anchorY - rotationCenterY) * sin)),
+                                                  (int)(rotationCenterY + ((localPos.X + anchorX - rotationCenterX) * sin + (localPos.Y + anchorY - rotationCenterY) * cos)));
+                        }
+                        else
+                        {
+                            localPos.X += anchorX;
+                            localPos.Y += anchorY;
+                        }
                     }
                     LastAbsolutePosition = localPos;
                     LastAbsoluteSize = localSize;
