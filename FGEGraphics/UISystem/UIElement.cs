@@ -192,6 +192,18 @@ namespace FGEGraphics.UISystem
         /// <returns>Whether the position is within any of the boundaries.</returns>
         protected bool SelfContains(int x, int y)
         {
+            // TODO: optimize
+            if (LastAbsoluteRotation > 0.001f)
+            {
+                double cos = Math.Cos(LastAbsoluteRotation);
+                double sin = Math.Sin(LastAbsoluteRotation);
+                int centerX = LastAbsolutePosition.X + LastAbsoluteSize.X / 2;
+                int centerY = LastAbsolutePosition.Y + LastAbsoluteSize.Y / 2;
+                int newX = (int)((x - centerX) * cos - (y - centerY) * sin) + centerX;
+                int newY = (int)((x - centerX) * sin + (y - centerY) * cos) + centerY;
+                x = newX;
+                y = newY;
+            }
             int lowX = LastAbsolutePosition.X;
             int lowY = LastAbsolutePosition.Y;
             int highX = lowX + LastAbsoluteSize.X;
