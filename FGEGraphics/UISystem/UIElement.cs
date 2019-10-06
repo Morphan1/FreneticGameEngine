@@ -326,27 +326,30 @@ namespace FGEGraphics.UISystem
         {
             if (Parent == null || !Parent.ToRemove.Contains(this))
             {
-                Vector2i localPos = Position.RelativePosition;
-                Vector2i localSize = Position.Size;
-                if (Parent != null)
+                if (Position.Dirty)
                 {
-                    int anchorX = Position.MainAnchor.GetX(this);
-                    int anchorY = Position.MainAnchor.GetY(this);
-                    double cos = Math.Cos(-Parent.LastAbsoluteRotation);
-                    double sin = Math.Sin(-Parent.LastAbsoluteRotation);
-                    Vector2i parentSize = Parent.LastAbsoluteSize;
-                    int halfWidth = parentSize.X / 2 - localSize.X / 2;
-                    int halfHeight = parentSize.Y / 2 - localSize.Y / 2;
-                    localPos = new Vector2i((int)(halfWidth + ((localPos.X + anchorX - halfWidth) * cos - (localPos.Y + anchorY - halfHeight) * sin)),
-                                          (int)(halfHeight + ((localPos.X + anchorX - halfWidth) * sin + (localPos.Y + anchorY - halfHeight) * cos)));
-                }
-                LastAbsolutePosition = localPos;
-                LastAbsoluteSize = localSize;
-                LastAbsoluteRotation = Position.Rotation;
-                if (Parent != null)
-                {
-                    LastAbsolutePosition += Parent.LastAbsolutePosition;
-                    LastAbsoluteRotation += Parent.LastAbsoluteRotation;
+                    Vector2i localPos = Position.RelativePosition;
+                    Vector2i localSize = Position.Size;
+                    if (Parent != null)
+                    {
+                        int anchorX = Position.MainAnchor.GetX(this);
+                        int anchorY = Position.MainAnchor.GetY(this);
+                        double cos = Math.Cos(-Parent.LastAbsoluteRotation);
+                        double sin = Math.Sin(-Parent.LastAbsoluteRotation);
+                        Vector2i parentSize = Parent.LastAbsoluteSize;
+                        int halfWidth = parentSize.X / 2 - localSize.X / 2;
+                        int halfHeight = parentSize.Y / 2 - localSize.Y / 2;
+                        localPos = new Vector2i((int)(halfWidth + ((localPos.X + anchorX - halfWidth) * cos - (localPos.Y + anchorY - halfHeight) * sin)),
+                                              (int)(halfHeight + ((localPos.X + anchorX - halfWidth) * sin + (localPos.Y + anchorY - halfHeight) * cos)));
+                    }
+                    LastAbsolutePosition = localPos;
+                    LastAbsoluteSize = localSize;
+                    LastAbsoluteRotation = Position.Rotation;
+                    if (Parent != null)
+                    {
+                        LastAbsolutePosition += Parent.LastAbsolutePosition;
+                        LastAbsoluteRotation += Parent.LastAbsoluteRotation;
+                    }
                 }
                 output.Add(this);
                 UpdateChildPositions(output, delta);
@@ -370,9 +373,24 @@ namespace FGEGraphics.UISystem
         protected virtual void UpdateChildPositions(IList<UIElement> output, double delta)
         {
             CheckChildren();
-            foreach (UIElement element in Children)
+            if (Position.Dirty)
             {
-                element.UpdatePositions(output, delta);
+                foreach (UIElement element in Children)
+                {
+                    element.Position.Dirty = true;
+                    element.UpdatePositions(output, delta);
+                }
+                if (!Position.HasAnyGetter())
+                {
+                    Position.Dirty = false;
+                }
+            }
+            else
+            {
+                foreach (UIElement element in Children)
+                {
+                    element.UpdatePositions(output, delta);
+                }
             }
         }
 

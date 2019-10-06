@@ -68,8 +68,7 @@ namespace FGEGraphics.UISystem
         /// <param name="view">The client UI View.</param>
         public UIScreen(ViewUI2D view) : this(view.Client, new UIPositionHelper(view))
         {
-            Position.GetterWidth(() => Parent == null ? Engine.Window.Width : Parent.Position.Width);
-            Position.GetterHeight(() => Parent == null ? Engine.Window.Height : Parent.Position.Height);
+            Position.MatchParent();
             RenderPriority = SCREEN_PRIORITY_DEFAULT;
         }
 

@@ -59,6 +59,13 @@ namespace FGEGraphics.UISystem
         public UIElement For;
 
         /// <summary>
+        /// Whether this position helper has been modified since the last <see cref="UIElement.UpdatePositions(IList{UIElement}, double)"/>.
+        /// </summary>
+        public bool Dirty;
+
+        // TODO: move below fields to an InternalData struct?
+
+        /// <summary>
         /// The main positional anchor.
         /// </summary>
         public UIAnchor MainAnchor = UIAnchor.CENTER;
@@ -146,6 +153,7 @@ namespace FGEGraphics.UISystem
         public UIPositionHelper Anchor(UIAnchor anchor)
         {
             MainAnchor = anchor;
+            Dirty = true;
             return this;
         }
 
@@ -158,6 +166,7 @@ namespace FGEGraphics.UISystem
         {
             PM_X = UIPosMode.CONSTANT;
             Const_X = x;
+            Dirty = true;
             return this;
         }
 
@@ -170,6 +179,7 @@ namespace FGEGraphics.UISystem
         {
             PM_Y = UIPosMode.CONSTANT;
             Const_Y = y;
+            Dirty = true;
             return this;
         }
 
@@ -185,6 +195,7 @@ namespace FGEGraphics.UISystem
             Const_X = x;
             PM_Y = UIPosMode.CONSTANT;
             Const_Y = y;
+            Dirty = true;
             return this;
         }
 
@@ -197,6 +208,7 @@ namespace FGEGraphics.UISystem
         {
             PM_Width = UIPosMode.CONSTANT;
             Const_Width = width;
+            Dirty = true;
             return this;
         }
 
@@ -209,6 +221,7 @@ namespace FGEGraphics.UISystem
         {
             PM_Height = UIPosMode.CONSTANT;
             Const_Height = height;
+            Dirty = true;
             return this;
         }
 
@@ -224,6 +237,7 @@ namespace FGEGraphics.UISystem
             Const_Width = width;
             PM_Height = UIPosMode.CONSTANT;
             Const_Height = height;
+            Dirty = true;
             return this;
         }
 
@@ -236,6 +250,7 @@ namespace FGEGraphics.UISystem
         {
             PM_Rot = UIPosMode.CONSTANT;
             Const_Rot = rotation;
+            Dirty = true;
             return this;
         }
 
@@ -248,6 +263,7 @@ namespace FGEGraphics.UISystem
         {
             PM_X = UIPosMode.GETTER;
             Getter_X = x;
+            Dirty = true;
             return this;
         }
 
@@ -275,6 +291,7 @@ namespace FGEGraphics.UISystem
             Getter_X = x;
             PM_Y = UIPosMode.GETTER;
             Getter_Y = y;
+            Dirty = true;
             return this;
         }
 
@@ -287,6 +304,7 @@ namespace FGEGraphics.UISystem
         {
             PM_Width = UIPosMode.GETTER;
             Getter_Width = width;
+            Dirty = true;
             return this;
         }
 
@@ -299,6 +317,7 @@ namespace FGEGraphics.UISystem
         {
             PM_Height = UIPosMode.GETTER;
             Getter_Height = height;
+            Dirty = true;
             return this;
         }
 
@@ -314,6 +333,7 @@ namespace FGEGraphics.UISystem
             Getter_Width = width;
             PM_Height = UIPosMode.GETTER;
             Getter_Height = height;
+            Dirty = true;
             return this;
         }
 
@@ -326,6 +346,24 @@ namespace FGEGraphics.UISystem
         {
             PM_Rot = UIPosMode.GETTER;
             Getter_Rot = rotation;
+            Dirty = true;
+            return this;
+        }
+
+        /// <summary>
+        /// Matches the parent element for all values.
+        /// <para>If there is no parent element, matches the client's window instead.</para>
+        /// </summary>
+        /// <returns>This object.</returns>
+        // TODO: individual methods for this?
+        public UIPositionHelper MatchParent()
+        {
+            PM_X = UIPosMode.MATCH_PARENT;
+            PM_Y = UIPosMode.MATCH_PARENT;
+            PM_Width = UIPosMode.MATCH_PARENT;
+            PM_Height = UIPosMode.MATCH_PARENT;
+            PM_Rot = UIPosMode.MATCH_PARENT;
+            Dirty = true;
             return this;
         }
 
@@ -336,6 +374,10 @@ namespace FGEGraphics.UISystem
         {
             get
             {
+                if (PM_X == UIPosMode.MATCH_PARENT)
+                {
+                    return For.Parent?.LastAbsolutePosition.X ?? 0;
+                }
                 int anch = For.Parent != null ? MainAnchor.GetX(For) : 0;
                 if (PM_X == UIPosMode.CONSTANT)
                 {
@@ -356,6 +398,10 @@ namespace FGEGraphics.UISystem
         {
             get
             {
+                if (PM_Y == UIPosMode.MATCH_PARENT)
+                {
+                    return For.Parent?.LastAbsolutePosition.Y ?? 0;
+                }
                 int anch = For.Parent != null ? MainAnchor.GetY(For) : 0;
                 if (PM_Y == UIPosMode.CONSTANT)
                 {
@@ -422,6 +468,10 @@ namespace FGEGraphics.UISystem
                 {
                     return Getter_Width();
                 }
+                if (PM_Width == UIPosMode.MATCH_PARENT)
+                {
+                    return For.Parent?.LastAbsoluteSize.X ?? For.Engine.Window.Width;
+                }
                 return 0;
             }
         }
@@ -441,6 +491,10 @@ namespace FGEGraphics.UISystem
                 {
                     return Getter_Height();
                 }
+                if (PM_Height == UIPosMode.MATCH_PARENT)
+                {
+                    return For.Parent?.LastAbsoluteSize.Y ?? For.Engine.Window.Height;
+                }
                 return 0;
             }
         }
@@ -459,6 +513,10 @@ namespace FGEGraphics.UISystem
                 if (PM_Rot == UIPosMode.GETTER)
                 {
                     return Getter_Rot();
+                }
+                if (PM_Rot == UIPosMode.MATCH_PARENT)
+                {
+                    return For.Parent?.LastAbsoluteRotation ?? 0f;
                 }
                 return 0f;
             }
@@ -498,6 +556,24 @@ namespace FGEGraphics.UISystem
         }
 
         /// <summary>
+        /// Whether any of this helper's <see cref="UIPosMode"/>-type fields are currently set to <see cref="UIPosMode.GETTER"/>.
+        /// <para><seealso cref="PM_X"/>, <seealso cref="PM_Y"/>, <seealso cref="PM_Rot"/>, <seealso cref="PM_Width"/>, <seealso cref="PM_Height"/></para>
+        /// </summary>
+        public bool HasAnyGetter()
+        {
+            return PM_X == UIPosMode.GETTER || PM_Y == UIPosMode.GETTER || PM_Rot == UIPosMode.GETTER || PM_Width == UIPosMode.GETTER || PM_Height == UIPosMode.GETTER;
+        }
+
+        /// <summary>
+        /// Whether any of this helper's <see cref="UIPosMode"/>-type fields are currently set to <see cref="UIPosMode.MATCH_PARENT"/>.
+        /// <para><seealso cref="PM_X"/>, <seealso cref="PM_Y"/>, <seealso cref="PM_Rot"/>, <seealso cref="PM_Width"/>, <seealso cref="PM_Height"/></para>
+        /// </summary>
+        public bool HasAnyMatchParent()
+        {
+            return PM_X == UIPosMode.MATCH_PARENT || PM_Y == UIPosMode.MATCH_PARENT || PM_Rot == UIPosMode.MATCH_PARENT || PM_Width == UIPosMode.MATCH_PARENT || PM_Height == UIPosMode.MATCH_PARENT;
+        }
+
+        /// <summary>
         /// Converts this position helper's present data to a simplified debug string.
         /// </summary>
         /// <returns>The debug string.</returns>
@@ -519,7 +595,10 @@ namespace FGEGraphics.UISystem
         /// <summary>
         /// A getter function.
         /// </summary>
-        GETTER = 1
-        // TODO: More modes!
+        GETTER = 1,
+        /// <summary>
+        /// Match the element's parent.
+        /// </summary>
+        MATCH_PARENT = 2
     }
 }

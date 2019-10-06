@@ -254,6 +254,11 @@ namespace FGEGraphics.ClientSystem
         }
 
         /// <summary>
+        /// Whether this window has been resized since the last <see cref="Window_RenderFrame(object, FrameEventArgs)"/>.
+        /// </summary>
+        public bool Resized;
+
+        /// <summary>
         /// Fired when the window is resized.
         /// </summary>
         /// <param name="sender">Irrelevant.</param>
@@ -263,6 +268,7 @@ namespace FGEGraphics.ClientSystem
             if (Loaded)
             {
                 CurrentEngine.ReloadScreenBuffers();
+                Resized = true;
             }
         }
 
@@ -397,6 +403,7 @@ namespace FGEGraphics.ClientSystem
                 Tick();
                 // Primary UI tick
                 MainUI.Tick();
+                Resized = false;
                 GraphicsUtil.CheckError("GameClient - PostTick");
                 // Final step: Swap the render buffer onto the screen!
                 Window.SwapBuffers();
