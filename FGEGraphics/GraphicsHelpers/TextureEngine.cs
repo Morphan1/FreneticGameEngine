@@ -557,6 +557,29 @@ namespace FGEGraphics.GraphicsHelpers
         /// The height of the texture.
         /// </summary>
         public int Height;
+
+        /// <summary>
+        /// Schedules an action to run synchronously once this texture has been loaded.
+        /// <para>If the texture is already loaded, runs the action immediately.</para>
+        /// <para>If the texture failed to load, returns false.</para>
+        /// <para>NOTE: Currently assumes it is called from the main thread. Calling it async could introduce race conditions.</para>
+        /// </summary>
+        /// <param name="action">The action to schedule.</param>
+        /// <returns>True if the action was scheduled or ran.</returns>
+        public bool PostLoadSync(Action action)
+        {
+            if (Goal != null)
+            {
+                Goal.SyncFollowUp += action;
+                return true;
+            }
+            else if (LoadedProperly)
+            {
+                action();
+                return true;
+            }
+            return false;
+        }
         
         /// <summary>
         /// Removes the texture from OpenGL.

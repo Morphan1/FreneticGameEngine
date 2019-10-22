@@ -354,7 +354,7 @@ namespace FGEGraphics.UISystem
                             int rotationCenterX = parentSize.X / 2 - localSize.X / 2;
                             int rotationCenterY = parentSize.Y / 2 - localSize.Y / 2;
                             localPos = new Vector2i((int)(rotationCenterX + ((localPos.X + anchorX - rotationCenterX) * cos - (localPos.Y + anchorY - rotationCenterY) * sin)),
-                                                  (int)(rotationCenterY + ((localPos.X + anchorX - rotationCenterX) * sin + (localPos.Y + anchorY - rotationCenterY) * cos)));
+                                                    (int)(rotationCenterY + ((localPos.X + anchorX - rotationCenterX) * sin + (localPos.Y + anchorY - rotationCenterY) * cos)));
                         }
                         else
                         {
